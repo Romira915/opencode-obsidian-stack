@@ -35,6 +35,7 @@ services:
       dockerfile: Dockerfile.livesync-cli
     container_name: livesync-cli
     restart: unless-stopped
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
