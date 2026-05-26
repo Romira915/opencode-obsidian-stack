@@ -1,0 +1,44 @@
+services:
+  openchamber:
+    build:
+      context: .
+      dockerfile: Dockerfile.openchamber
+      args:
+        OPENCHAMBER_REF: ${OPENCHAMBER_REF:-main}
+    container_name: openchamber
+    restart: unless-stopped
+    ports:
+      - "${OPENCHAMBER_PORT:-3000}:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      OPENCHAMBER_HOST: 0.0.0.0
+      UI_PASSWORD: ${UI_PASSWORD:?set UI_PASSWORD in .env}
+      OPENCHAMBER_OPENCODE_HOSTNAME: 0.0.0.0
+      # Uncomment these if OpenChamber should connect to an external OpenCode server.
+      # OPENCODE_HOST: ${OPENCODE_HOST}
+      # OPENCODE_SKIP_START: "true"
+    volumes:
+      - ./data/openchamber:/home/openchamber/.config/openchamber
+      - ./data/opencode/share:/home/openchamber/.local/share/opencode
+      - ./data/opencode/state:/home/openchamber/.local/state/opencode
+      - ./data/opencode/config:/home/openchamber/.config/opencode
+      - ./data/ssh:/home/openchamber/.ssh
+      - ${VAULT_PATH:?set VAULT_PATH in .env}:/home/openchamber/workspaces/obsidian-vault
+
+  livesync-cli:
+    build:
+      context: .
+      dockerfile: Dockerfile.livesync-cli
+    container_name: livesync-cli
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        if [ ! -s /vault/.livesync/settings.json ] || ! grep -q '"isConfigured"[[:space:]]*:[[:space:]]*true' /vault/.livesync/settings.json; then
+          echo "LiveSync CLI is not configured yet. Run setup before enabling sync.";
+          sleep infinity;
+        fi
+        exec node /app/dist/index.cjs /vault
+    volumes:
+      - ${VAULT_PATH:?set VAULT_PATH in .env}:/vault
