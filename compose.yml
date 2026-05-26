@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile.openchamber
       args:
         OPENCHAMBER_REF: ${OPENCHAMBER_REF:-main}
+        UID: ${HOST_UID:-1000}
+        GID: ${HOST_GID:-1000}
     container_name: openchamber
     restart: unless-stopped
     # ポートは nginx → oauth2-proxy 経由でしかアクセスしないためホストには公開しない
