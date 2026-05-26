@@ -54,7 +54,7 @@ Use your existing Obsidian LiveSync setup URI and setup passphrase. This writes 
 Do not paste secrets directly into shell commands. Use the helper script so the values are read interactively and are not saved in shell history.
 
 ```bash
-docker compose build livesync-cli
+docker compose build --no-cache livesync-cli
 bash scripts/setup-livesync.sh
 ```
 
@@ -88,6 +88,33 @@ LiveSync CLI sees the same host directory as:
 - Do not add Syncthing, rsync loops, Dropbox, or other file sync tools to the same vault.
 - Use `.livesync/ignore` inside the vault to exclude generated files that should not be synced.
 - OpenChamber is built from `https://github.com/openchamber/openchamber` instead of relying on a third-party Docker Hub image.
+
+## Troubleshooting
+
+### LiveSync setup fails on first try
+
+`docker compose build livesync-cli` may use stale build cache and skip applying the patch that prevents the exit handler from overwriting `settings.json`. Always build with `--no-cache` before setup:
+
+```bash
+docker compose build --no-cache livesync-cli
+bash scripts/setup-livesync.sh
+```
+
+### Synced files owned by root, OpenChamber can't read
+
+`livesync-cli` container runs as root by default. `compose.yml` sets `user: "${HOST_UID:-1000}:${HOST_GID:-1000}"` to match `openchamber`. After first sync or after this config change:
+
+```bash
+sudo chown -R "${HOST_UID:-1000}:${HOST_GID:-1000}" data/vault
+docker compose up -d livesync-cli
+```
+
+### File tree not showing in browser
+
+Browser cache / Service Worker can cause stale file tree. Try:
+- Incognito / private window
+- Another browser
+- DevTools → Disable cache + hard reload
 
 ## References
 
