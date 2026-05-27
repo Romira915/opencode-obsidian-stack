@@ -55,19 +55,19 @@ RUN npm config set prefix /home/openchamber/.npm-global \
     && npm config set fetch-retry-mintimeout 20000 \
     && npm config set fetch-retry-maxtimeout 120000 \
     && mkdir -p /home/openchamber/.npm-global \
-    && mkdir -p /home/openchamber/.local /home/openchamber/.config /home/openchamber/.ssh \
+    && mkdir -p /home/openchamber/.local /home/openchamber/.config /home/openchamber/.ssh /home/openchamber/workspaces \
     && npm install -g opencode-ai
 
 COPY --from=cloudflare/cloudflared@sha256:6b599ca3e974349ead3286d178da61d291961182ec3fe9c505e1dd02c8ac31b0 /usr/local/bin/cloudflared /usr/local/bin/cloudflared
 
-COPY --from=source /src/scripts/docker-entrypoint.sh /home/openchamber/openchamber-entrypoint.sh
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages/web/node_modules ./packages/web/node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/packages/web/package.json ./packages/web/package.json
-COPY --from=builder /app/packages/web/bin ./packages/web/bin
-COPY --from=builder /app/packages/web/server ./packages/web/server
-COPY --from=builder /app/packages/web/dist ./packages/web/dist
+COPY --chown=$UID:$GID --from=source /src/scripts/docker-entrypoint.sh /home/openchamber/openchamber-entrypoint.sh
+COPY --chown=$UID:$GID --from=deps /app/node_modules ./node_modules
+COPY --chown=$UID:$GID --from=deps /app/packages/web/node_modules ./packages/web/node_modules
+COPY --chown=$UID:$GID --from=builder /app/package.json ./package.json
+COPY --chown=$UID:$GID --from=builder /app/packages/web/package.json ./packages/web/package.json
+COPY --chown=$UID:$GID --from=builder /app/packages/web/bin ./packages/web/bin
+COPY --chown=$UID:$GID --from=builder /app/packages/web/server ./packages/web/server
+COPY --chown=$UID:$GID --from=builder /app/packages/web/dist ./packages/web/dist
 
 EXPOSE 3000
 
