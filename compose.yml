@@ -28,6 +28,11 @@ services:
       - ./data/opencode/config:/home/openchamber/.config/opencode
       - ./data/ssh:/home/openchamber/.ssh
       - ${VAULT_PATH:?set VAULT_PATH in .env}:/home/openchamber/workspaces/obsidian-vault
+      - ./romira-s-config/ai-config/skills:/home/openchamber/.config/opencode/skills:ro
+      - ./romira-s-config/ai-config/rules:/home/openchamber/.config/opencode/rules:ro
+      - ./romira-s-config/ai-config/CLAUDE.md:/home/openchamber/.config/opencode/AGENTS.md:ro
+      - ./romira-s-config/ai-config/opencode/opencode.json:/home/openchamber/.config/opencode/opencode.json:ro
+      - ./romira-s-config/ai-config/opencode/tui.json:/home/openchamber/.config/opencode/tui.json:ro
 
   livesync-cli:
     build:
