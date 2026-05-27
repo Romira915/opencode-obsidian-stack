@@ -36,6 +36,17 @@ RUN apt-get update \
       openssh-client \
       python3 \
       wget \
+      curl \
+      sudo \
+      jq \
+      procps \
+      htop \
+      ripgrep \
+      fd-find \
+      vim \
+      zip \
+      unzip \
+      dnsutils \
     && mkdir -p -m 755 /etc/apt/keyrings \
     && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
     && chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
@@ -49,7 +60,9 @@ ARG GID=1000
 RUN if getent group "$GID" >/dev/null; then echo "GID $GID exists"; else groupadd -g "$GID" openchamber; fi \
     && if getent passwd "$UID" >/dev/null; then echo "UID $UID exists"; else useradd -u "$UID" -g "$GID" -m -s /bin/bash openchamber; fi \
     && userdel -r bun 2>/dev/null || true \
-    && chown -R "$UID:$GID" /home/openchamber
+    && chown -R "$UID:$GID" /home/openchamber \
+    && echo "openchamber ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/openchamber \
+    && chmod 440 /etc/sudoers.d/openchamber
 
 USER openchamber
 
