@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+docker compose -f "$REPO_DIR/compose.yml" build --no-cache livesync-cli
+
 read -r -p "LiveSync setup URI: " SETUP_URI
 read -r -s -p "LiveSync setup URI passphrase: " SETUP_PASSPHRASE
 printf '\n'
