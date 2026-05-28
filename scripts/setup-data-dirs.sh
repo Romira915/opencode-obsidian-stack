@@ -9,12 +9,24 @@ mkdir -p \
   "$REPO_DIR/data/opencode/state" \
   "$REPO_DIR/data/opencode/config" \
   "$REPO_DIR/data/ssh" \
+  "$REPO_DIR/data/gh" \
   "$REPO_DIR/data/vault"
 
 if [ "$(id -u)" -eq 0 ]; then
   chown -R 1000:1000 "$REPO_DIR/data"
 else
   chown -R 1000:1000 "$REPO_DIR/data" 2>/dev/null || true
+fi
+
+if ! [ -d /home/openchamber/workspaces ]; then
+  if [ "$(id -u)" -eq 0 ]; then
+    mkdir -p /home/openchamber/workspaces
+    chown 1000:1000 /home/openchamber/workspaces
+  else
+    echo "[warn] need sudo for /home/openchamber/workspaces"
+    sudo mkdir -p /home/openchamber/workspaces
+    sudo chown 1000:1000 /home/openchamber/workspaces
+  fi
 fi
 
 echo "[done] data directories ready"

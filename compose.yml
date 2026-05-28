@@ -27,6 +27,8 @@ services:
       - ./data/opencode/state:/home/openchamber/.local/state/opencode
       - ./data/opencode/config:/home/openchamber/.config/opencode
       - ./data/ssh:/home/openchamber/.ssh
+      - ./data/gh:/home/openchamber/.config/gh
+      - /home/openchamber/workspaces:/home/openchamber/workspaces
       - ${VAULT_PATH:?set VAULT_PATH in .env}:/home/openchamber/workspaces/obsidian-vault
       - ./romira-s-config/ai-config/skills:/home/openchamber/.config/opencode/skills:ro
       - ./romira-s-config/ai-config/rules:/home/openchamber/.config/opencode/rules:ro
