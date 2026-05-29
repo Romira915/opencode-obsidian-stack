@@ -35,6 +35,8 @@ RUN apt-get update \
       npm \
       openssh-client \
       python3 \
+      python3-pip \
+      python3-venv \
       wget \
       curl \
       sudo \
@@ -53,7 +55,8 @@ RUN apt-get update \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
     && apt-get update \
     && apt-get install -y --no-install-recommends gh \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && pip3 install uv
 
 ARG UID=1000
 ARG GID=1000
