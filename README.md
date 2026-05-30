@@ -116,6 +116,38 @@ Browser cache / Service Worker can cause stale file tree. Try:
 - Another browser
 - DevTools → Disable cache + hard reload
 
+### Reverse proxy drops live updates
+
+OpenChamber uses long-lived event streams and WebSocket connections. If session titles, status, or permission prompts do not update through nginx, disable buffering and forward upgrade headers:
+
+```nginx
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+server {
+    server_name opencode.example.com;
+
+    proxy_buffering off;
+    client_max_body_size 100m;
+
+    location / {
+        proxy_pass http://127.0.0.1:4180;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+    }
+}
+```
+
 ## References
 
 - OpenChamber: https://github.com/openchamber/openchamber

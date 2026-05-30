@@ -72,6 +72,8 @@ services:
       - --authenticated-emails-file=/etc/oauth2-proxy/authenticated-emails.txt
       - --cookie-expire=168h
       - --reverse-proxy=true
+      - --pass-host-header=true
+      - --proxy-websockets=true
     volumes:
       - ./authenticated-emails.txt:/etc/oauth2-proxy/authenticated-emails.txt:ro
     ports:
