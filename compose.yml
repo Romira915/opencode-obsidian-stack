@@ -18,6 +18,8 @@ services:
       OPENCHAMBER_HOST: 0.0.0.0
       UI_PASSWORD: ${UI_PASSWORD:?set UI_PASSWORD in .env}
       OPENCHAMBER_OPENCODE_HOSTNAME: 0.0.0.0
+      OPENCODE_BINARY: /home/openchamber/.npm-global/bin/opencode
+      PATH: /home/openchamber/.npm-global/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       # Uncomment these if OpenChamber should connect to an external OpenCode server.
       # OPENCODE_HOST: ${OPENCODE_HOST}
       # OPENCODE_SKIP_START: "true"
