@@ -3,6 +3,10 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+set -a; source "$REPO_DIR/.env"; set +a
+HOST_UID="${HOST_UID:-1000}"
+HOST_GID="${HOST_GID:-1000}"
+
 mkdir -p \
   "$REPO_DIR/data/openchamber" \
   "$REPO_DIR/data/opencode/share" \
@@ -18,19 +22,19 @@ touch "$REPO_DIR/data/opencode/config/env/google-oauth-client-secret"
 touch "$REPO_DIR/data/opencode/config/env/user-google-email"
 
 if [ "$(id -u)" -eq 0 ]; then
-  chown -R 1000:1000 "$REPO_DIR/data"
+  chown -R "$HOST_UID:$HOST_GID" "$REPO_DIR/data"
 else
-  chown -R 1000:1000 "$REPO_DIR/data" 2>/dev/null || true
+  chown -R "$HOST_UID:$HOST_GID" "$REPO_DIR/data" 2>/dev/null || true
 fi
 
 if ! [ -d /home/openchamber/workspaces ]; then
   if [ "$(id -u)" -eq 0 ]; then
     mkdir -p /home/openchamber/workspaces
-    chown 1000:1000 /home/openchamber/workspaces
+    chown "$HOST_UID:$HOST_GID" /home/openchamber/workspaces
   else
     echo "[warn] need sudo for /home/openchamber/workspaces"
     sudo mkdir -p /home/openchamber/workspaces
-    sudo chown 1000:1000 /home/openchamber/workspaces
+    sudo chown "$HOST_UID:$HOST_GID" /home/openchamber/workspaces
   fi
 fi
 
