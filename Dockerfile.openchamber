@@ -15,7 +15,6 @@ COPY --from=source /src/packages/ui/package.json ./packages/ui/
 COPY --from=source /src/packages/web/package.json ./packages/web/
 COPY --from=source /src/packages/electron/package.json ./packages/electron/
 COPY --from=source /src/packages/vscode/package.json ./packages/vscode/
-COPY --from=source /src/packages/docs/package.json ./packages/docs/
 RUN bun install --ignore-scripts
 
 FROM deps AS builder
