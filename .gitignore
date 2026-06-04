@@ -1,5 +1,6 @@
 .env
 data/
+workspaces/
 authenticated-emails.txt
 .playwright-mcp/
 romira-s-config/
