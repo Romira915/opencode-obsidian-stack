@@ -49,6 +49,19 @@ RUN apt-get update \
       zip \
       unzip \
       dnsutils \
+      chromium \
+      libnss3 \
+      libnspr4 \
+      libatk-bridge2.0-0 \
+      libdrm2 \
+      libxkbcommon0 \
+      libgbm1 \
+      libasound2 \
+      libxcomposite1 \
+      libxdamage1 \
+      libxrandr2 \
+      libpango-1.0-0 \
+      libcairo2 \
     && mkdir -p -m 755 /etc/apt/keyrings \
     && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
     && chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
@@ -75,6 +88,9 @@ USER openchamber
 ENV NPM_CONFIG_PREFIX=/home/openchamber/.npm-global
 ENV PATH=${NPM_CONFIG_PREFIX}/bin:${PATH}
 ENV NODE_ENV=production
+# Playwright: use system Chromium instead of downloading its own (ARM-compatible)
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 
 RUN npm config set prefix /home/openchamber/.npm-global \
     && npm config set fetch-retries 5 \
