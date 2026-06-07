@@ -91,6 +91,9 @@ ENV NODE_ENV=production
 # Playwright: use system Chromium instead of downloading its own (ARM-compatible)
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
+# @playwright/mcp reads its own env vars, not the standard Playwright ones above
+ENV PLAYWRIGHT_MCP_EXECUTABLE_PATH=/usr/bin/chromium
+ENV PLAYWRIGHT_MCP_BROWSER=chromium
 
 RUN npm config set prefix /home/openchamber/.npm-global \
     && npm config set fetch-retries 5 \
