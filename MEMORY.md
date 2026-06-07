@@ -57,6 +57,13 @@
 - If `/api/session/{id}` shows the generated title but UI remains stale, the problem is live sync/event stream delivery.
 - If `/api/session/{id}` remains default title, the problem is title-generation trigger conditions or title agent failure for that session.
 
+## 2026-06-07 Google Workspace MCP 認証永続化
+
+### Completed
+- `compose.yml`: `./data/google-workspace-mcp:/home/openchamber/.google_workspace_mcp` を volume mount に追加
+- `scripts/setup-data-dirs.sh`: `$REPO_DIR/data/google-workspace-mcp` のディレクトリ作成を追加
+- 配置場所は `./workspaces/` ではなく `./data/` 配下（他と一貫させるため）
+
 ### Next Checks
 - If title generation regresses, inspect the latest remote OpenCode log for `agent=title` and `failed to generate title`; the model should now be `deepseek-v4-flash-free`, not `gpt-5-nano`.
 - Old sessions whose title generation already failed will not automatically retry unless manually renamed or retriggered by code/API.

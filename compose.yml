@@ -31,6 +31,7 @@ services:
       - ./data/ssh:/home/openchamber/.ssh
       - ./data/gh:/home/openchamber/.config/gh
       - ./workspaces:/home/openchamber/workspaces
+      - ./data/google-workspace-mcp:/home/openchamber/.google_workspace_mcp
       - ${VAULT_PATH:?set VAULT_PATH in .env}:/home/openchamber/workspaces/obsidian-vault
       - ./romira-s-config/ai-config/skills:/home/openchamber/.config/opencode/skills:ro
       - ./romira-s-config/ai-config/rules:/home/openchamber/.config/opencode/rules:ro

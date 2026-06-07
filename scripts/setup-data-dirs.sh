@@ -14,7 +14,8 @@ mkdir -p \
   "$REPO_DIR/data/opencode/config/env" \
   "$REPO_DIR/data/ssh" \
   "$REPO_DIR/data/gh" \
-  "$REPO_DIR/data/vault"
+  "$REPO_DIR/data/vault" \
+  "$REPO_DIR/data/google-workspace-mcp"
 
 # OpenCode の opencode.json が参照する env ファイル群（値は後で手動入力）
 touch "$REPO_DIR/data/opencode/config/env/google-oauth-client-id"
