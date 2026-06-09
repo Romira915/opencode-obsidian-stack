@@ -31,8 +31,6 @@ RUN apt-get update \
       ca-certificates \
       git \
       less \
-      nodejs \
-      npm \
       openssh-client \
       python3 \
       python3-pip \
@@ -40,6 +38,12 @@ RUN apt-get update \
       wget \
       curl \
       sudo \
+      xz-utils \
+      gcc \
+      g++ \
+      make \
+      pkg-config \
+      libssl-dev \
       jq \
       procps \
       htop \
@@ -74,11 +78,36 @@ RUN apt-get update \
     && ln -s /opt/uv/bin/uv /usr/local/bin/uv \
     && ln -s /opt/uv/bin/uvx /usr/local/bin/uvx
 
+ARG NODE_VERSION=24.16.0
+RUN set -eux; \
+    arch="$(dpkg --print-architecture)"; \
+    case "$arch" in \
+        amd64) node_arch='x64' ;; \
+        arm64) node_arch='arm64' ;; \
+        *) echo "Unsupported arch: $arch"; exit 1 ;; \
+    esac; \
+    curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${node_arch}.tar.xz" -o /tmp/node.tar.xz; \
+    tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1; \
+    rm /tmp/node.tar.xz
+
+ENV RUSTUP_HOME=/usr/local/rustup
+ENV CARGO_HOME=/usr/local/cargo
+ENV PATH=${CARGO_HOME}/bin:${PATH}
+RUN set -eux; \
+    curl -fsSL https://sh.rustup.rs -o /tmp/rustup-init.sh; \
+    sh /tmp/rustup-init.sh -y --no-modify-path --profile minimal; \
+    rm /tmp/rustup-init.sh; \
+    rustup --version; \
+    cargo --version; \
+    cargo install just --locked
+
 ARG UID=1000
 ARG GID=1000
-RUN if getent group "$GID" >/dev/null; then echo "GID $GID exists"; else groupadd -g "$GID" openchamber; fi \
-    && if getent passwd "$UID" >/dev/null; then echo "UID $UID exists"; else useradd -u "$UID" -g "$GID" -m -s /bin/bash openchamber; fi \
-    && userdel -r bun 2>/dev/null || true \
+# bun user (UID 1000) in the base image conflicts with our desired UID;
+# remove it first, then always ensure openchamber group/user exist
+RUN (getent passwd "$UID" >/dev/null && userdel -r "$(getent passwd "$UID" | cut -d: -f1)" 2>/dev/null || true) \
+    && if ! getent group "$GID" >/dev/null; then groupadd -g "$GID" openchamber; fi \
+    && if ! getent passwd openchamber >/dev/null; then useradd -u "$UID" -g "$GID" -m -s /bin/bash openchamber; fi \
     && chown -R "$UID:$GID" /home/openchamber \
     && echo "openchamber ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/openchamber \
     && chmod 440 /etc/sudoers.d/openchamber
