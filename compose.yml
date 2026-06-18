@@ -44,6 +44,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.livesync-cli
+      args:
+        LIVESYNC_REF: ${LIVESYNC_REF:-0.25.76-cli}
     container_name: livesync-cli
     restart: unless-stopped
     user: "${HOST_UID:-1000}:${HOST_GID:-1000}"

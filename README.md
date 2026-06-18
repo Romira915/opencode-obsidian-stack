@@ -25,6 +25,7 @@ OPENCHAMBER_PORT=3000
 UI_PASSWORD=long-random-password
 VAULT_PATH=./data/vault
 OPENCHAMBER_REF=main
+LIVESYNC_REF=0.25.76-cli
 ```
 
 For local single-host operation, `VAULT_PATH=./data/vault` is recommended. The whole `data/` directory is ignored by git.
@@ -88,6 +89,7 @@ LiveSync CLI sees the same host directory as:
 - Do not add Syncthing, rsync loops, Dropbox, or other file sync tools to the same vault.
 - Use `.livesync/ignore` inside the vault to exclude generated files that should not be synced.
 - OpenChamber is built from `https://github.com/openchamber/openchamber` instead of relying on a third-party Docker Hub image.
+- Self-hosted LiveSync CLI is built from `https://github.com/vrtmrz/obsidian-livesync`. `LIVESYNC_REF` defaults to a release tag so production builds do not unexpectedly follow upstream `main`.
 
 ## Troubleshooting
 
@@ -98,6 +100,14 @@ LiveSync CLI sees the same host directory as:
 ```bash
 docker compose build --no-cache livesync-cli
 bash scripts/setup-livesync.sh
+```
+
+### LiveSync image build fails on runtime-package.json
+
+Older versions of this stack copied `src/apps/cli/runtime-package.json` directly from the upstream repository. Some upstream refs provide that file, while newer refs keep the runtime dependency list in `src/apps/cli/package.json`. This stack normalizes either layout during the builder stage. Rebuild after pulling this stack update:
+
+```bash
+docker compose build --no-cache livesync-cli
 ```
 
 ### Synced files owned by root, OpenChamber can't read

@@ -1,14 +1,20 @@
 FROM node:24-slim AS builder
+ARG LIVESYNC_REF=0.25.76-cli
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git python3 make g++ ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
-RUN git clone --depth 1 --recurse-submodules https://github.com/vrtmrz/obsidian-livesync.git .
+RUN git clone --depth 1 --branch "$LIVESYNC_REF" --recurse-submodules https://github.com/vrtmrz/obsidian-livesync.git .
 RUN perl -0pi -e 's/const settingsBackup = await fs\.readFile\(settingsPath, "utf-8"\)\.catch\(\(\) => null!\);/const settingsBackup = options.command === "setup" ? null : await fs.readFile(settingsPath, "utf-8").catch(() => null!);/' src/apps/cli/main.ts
 RUN npm install --silent
 RUN cd src/apps/cli && npm run build
+RUN if [ -f src/apps/cli/runtime-package.json ]; then \
+      cp src/apps/cli/runtime-package.json /build/runtime-package.json; \
+    else \
+      cp src/apps/cli/package.json /build/runtime-package.json; \
+    fi
 
 FROM node:24-slim AS runtime-deps
 
@@ -17,7 +23,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /deps
-COPY --from=builder /build/src/apps/cli/runtime-package.json ./package.json
+COPY --from=builder /build/runtime-package.json ./package.json
 RUN npm install --omit=dev --silent
 
 FROM node:24-slim
