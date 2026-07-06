@@ -15,7 +15,19 @@ mkdir -p \
   "$REPO_DIR/data/ssh" \
   "$REPO_DIR/data/gh" \
   "$REPO_DIR/data/vault" \
-  "$REPO_DIR/data/google-workspace-mcp"
+  "$REPO_DIR/data/google-workspace-mcp" \
+  "$REPO_DIR/data/desktop-bypass-token"
+
+# OpenChamber Desktop bypass 用の共有秘密 (nginx サイドカー X-Desktop-Token 判定)
+# openssl を必須扱い、フォールバック処理は無し
+command -v openssl >/dev/null 2>&1 || { echo "[setup] ERROR: openssl required to generate DESKTOP_BYPASS_TOKEN"; exit 1; }
+if [ ! -s "$REPO_DIR/data/desktop-bypass-token/token" ]; then
+    openssl rand -base64 32 > "$REPO_DIR/data/desktop-bypass-token/token"
+    chmod 600 "$REPO_DIR/data/desktop-bypass-token/token"
+    echo "[setup] generated data/desktop-bypass-token/token (chmod 600)"
+else
+    echo "[setup] reusing existing data/desktop-bypass-token/token (size=$(stat -c %s "$REPO_DIR/data/desktop-bypass-token/token"))"
+fi
 
 # OpenCode の opencode.json が参照する env ファイル群（値は後で手動入力）
 touch "$REPO_DIR/data/opencode/config/env/google-oauth-client-id"
