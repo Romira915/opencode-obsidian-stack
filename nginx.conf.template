@@ -17,7 +17,15 @@ http {
     # $backend is used as a variable (nginx requires an explicit resolver).
     resolver 127.0.0.11 ipv6=off valid=10s;
 
-    # X-Desktop-Token 一致 → 1、不一致 → 0
+    # Desktop Electron の Origin 判定
+    # BrowserWindow は常に openchamber-ui://app から SPA を読み込むため、
+    # Origin ヘッダが openchamber-ui://app なら Desktop からのリクエストと判定できる
+    map $http_origin $is_desktop_origin {
+        default 0;
+        "openchamber-ui://app"  1;
+    }
+
+    # X-Desktop-Token 一致 → 1、不一致 → 0 (curl/test 用)
     map $http_x_desktop_token $token_matched {
         default 0;
         "${DESKTOP_BYPASS_TOKEN}"  1;
@@ -52,14 +60,21 @@ http {
         location / {
             set $backend "${UPSTREAM_OAUTH2_PROXY}";
 
-            # CORS プリフライト (OPTIONS) は常に openchamber 直。
-            # カスタムヘッダ X-Desktop-Token を送る Desktop からのクロスオリジン
-            # リクエストでプリフライトが発生し、oauth2-proxy が 403 を返すのを防ぐ。
+            # CORS プリフライト (OPTIONS) は常に openchamber 直
             if ($request_method = OPTIONS) {
                 set $backend "${UPSTREAM_OPENCHAMBER}";
             }
 
-            # X-Desktop-Token 一致 → openchamber 直
+            # Desktop (Electron) からのリクエスト → 常に openchamber 直
+            # Origin: openchamber-ui://app は Desktop の BrowserWindow のみが送る。
+            # 一般ブラウザはこの Origin を送れない (ブラウザはカスタムスキームを制限する)。
+            # openchamber 側の UI_PASSWORD 認証で守られるので、
+            # この層で oauth2-proxy を bypass しても実害はない。
+            if ($is_desktop_origin) {
+                set $backend "${UPSTREAM_OPENCHAMBER}";
+            }
+
+            # X-Desktop-Token 一致 → openchamber 直 (curl/test 用)
             if ($token_matched) {
                 set $backend "${UPSTREAM_OPENCHAMBER}";
             }
