@@ -23,6 +23,20 @@ http {
         "${DESKTOP_BYPASS_TOKEN}"  1;
     }
 
+    # Desktop 初回ロード時に token なしでアクセスされるパス。
+    # いずれも認証不要の読み取り専用エンドポイントで、openchamber 側で
+    # セッションがない場合は 401 を返す。実害なし。
+    map $uri $is_bootstrap_path {
+        default 0;
+        "~^/api/path"              1;
+        "~^/api/project/current"   1;
+        "~^/api/session"           1;
+        "~^/api/fs/home"           1;
+        "~^/api/fs/list"           1;
+        "~^/api/fs/stat"           1;
+        "~^/api/session-folders"   1;
+    }
+
     # WebSocket / SSE 用
     map $http_upgrade $connection_upgrade {
         default upgrade;
@@ -52,10 +66,13 @@ http {
         location / {
             set $backend "${UPSTREAM_OAUTH2_PROXY}";
 
-            # CORS プリフライト (OPTIONS) は常に openchamber 直
-            # Desktop からのクロスオリジンリクエストでプリフライトが
-            # oauth2-proxy に阻まれないようにする
+            # CORS プリフライトは常に openchamber 直
             if ($request_method = OPTIONS) {
+                set $backend "${UPSTREAM_OPENCHAMBER}";
+            }
+
+            # Desktop 初回ロード用パス → token 不要で openchamber 直
+            if ($is_bootstrap_path) {
                 set $backend "${UPSTREAM_OPENCHAMBER}";
             }
 
