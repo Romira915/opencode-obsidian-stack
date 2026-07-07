@@ -17,11 +17,10 @@ http {
     # $backend is used as a variable (nginx requires an explicit resolver).
     resolver 127.0.0.11 ipv6=off valid=10s;
 
-    # X-Desktop-Token 一致で openchamber 直、不一致で oauth2-proxy
-    # 共有秘密 DESKTOP_BYPASS_TOKEN はエントリポイントで envsubst により展開される
-    map $http_x_desktop_token $backend {
-        default ${UPSTREAM_OAUTH2_PROXY};
-        "${DESKTOP_BYPASS_TOKEN}"  ${UPSTREAM_OPENCHAMBER};
+    # X-Desktop-Token 一致 → 1、不一致 → 0
+    map $http_x_desktop_token $token_matched {
+        default 0;
+        "${DESKTOP_BYPASS_TOKEN}"  1;
     }
 
     # WebSocket / SSE 用
@@ -51,6 +50,20 @@ http {
         proxy_set_header X-Desktop-Token "";
 
         location / {
+            set $backend "${UPSTREAM_OAUTH2_PROXY}";
+
+            # CORS プリフライト (OPTIONS) は常に openchamber 直。
+            # カスタムヘッダ X-Desktop-Token を送る Desktop からのクロスオリジン
+            # リクエストでプリフライトが発生し、oauth2-proxy が 403 を返すのを防ぐ。
+            if ($request_method = OPTIONS) {
+                set $backend "${UPSTREAM_OPENCHAMBER}";
+            }
+
+            # X-Desktop-Token 一致 → openchamber 直
+            if ($token_matched) {
+                set $backend "${UPSTREAM_OPENCHAMBER}";
+            }
+
             proxy_pass $backend;
         }
     }
