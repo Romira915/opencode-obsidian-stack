@@ -190,7 +190,7 @@ The browser flow still goes through oauth2-proxy + Google OAuth. Only Desktop re
 ```bash
 openssl rand -base64 32 > data/desktop-bypass-token/token
 chmod 600 data/desktop-bypass-token/token
-docker compose up -d desktop-bypass-nginx
+docker compose restart desktop-bypass-nginx
 ```
 
 Then update the `X-Desktop-Token` value in OpenChamber Desktop.
