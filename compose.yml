@@ -84,3 +84,21 @@ services:
       - ./authenticated-emails.txt:/etc/oauth2-proxy/authenticated-emails.txt:ro
     ports:
       - "${OAUTH2_PROXY_PORT:-4180}:4180"
+
+  desktop-bypass-nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.desktop-bypass-nginx
+    container_name: desktop-bypass-nginx
+    restart: unless-stopped
+    depends_on:
+      - openchamber
+      - oauth2-proxy
+    environment:
+      UPSTREAM_OAUTH2_PROXY: http://oauth2-proxy:4180
+      UPSTREAM_OPENCHAMBER: http://openchamber:3000
+    volumes:
+      - ./data/desktop-bypass-token/token:/run/secrets/desktop_bypass_token:ro
+    # host loopback のみ公開 (oci-tokyo-ampere の nginx から接続)
+    ports:
+      - "127.0.0.1:4181:4181"

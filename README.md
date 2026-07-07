@@ -158,6 +158,43 @@ server {
 }
 ```
 
+## OpenChamber Desktop
+
+OpenChamber Desktop (1.13.9+) can connect to this stack without going through the Google OAuth flow in a browser. A small nginx sidecar (`desktop-bypass-nginx`) listens on `127.0.0.1:4181` and forwards requests with a matching `X-Desktop-Token` header directly to openchamber, skipping oauth2-proxy.
+
+### Setup
+
+1. After running `bash scripts/setup.sh`, a shared secret is generated at `data/desktop-bypass-token/token` (chmod 600). The container reads this on every start.
+
+2. Make the sidecar reachable from the host running the front-door nginx. The sidecar is already published on `127.0.0.1:4181` by compose. Point the front-door nginx (e.g. `/etc/nginx/sites-available/opencode.romira.dev.conf`) at it:
+
+   ```nginx
+   location / {
+       proxy_pass http://127.0.0.1:4181;  # was: http://127.0.0.1:4180 (oauth2-proxy)
+       ...
+   }
+   ```
+
+3. In OpenChamber Desktop, add a remote host with these settings:
+   - **URL**: `https://opencode.romira.dev`
+   - **Custom Request Headers**: Key `X-Desktop-Token`, Value = contents of `data/desktop-bypass-token/token`
+
+4. On first connection, the openchamber password prompt appears. Enter `UI_PASSWORD` from `.env`. The client token is stored in Desktop and re-used until it expires.
+
+### Browser access (unchanged)
+
+The browser flow still goes through oauth2-proxy + Google OAuth. Only Desktop requests carrying the matching `X-Desktop-Token` skip oauth2-proxy. The `X-Desktop-Token` header is consumed by the sidecar and never reaches openchamber.
+
+### Rotating the shared secret
+
+```bash
+openssl rand -base64 32 > data/desktop-bypass-token/token
+chmod 600 data/desktop-bypass-token/token
+docker compose restart desktop-bypass-nginx
+```
+
+Then update the `X-Desktop-Token` value in OpenChamber Desktop.
+
 ## References
 
 - OpenChamber: https://github.com/openchamber/openchamber
