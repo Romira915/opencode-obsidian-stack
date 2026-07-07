@@ -17,15 +17,19 @@ http {
     # $backend is used as a variable (nginx requires an explicit resolver).
     resolver 127.0.0.11 ipv6=off valid=10s;
 
-    # X-Desktop-Token 一致 → 1、不一致 → 0
+    # X-Desktop-Token 一致 → 1 (共有秘密、curl/test 用)
     map $http_x_desktop_token $token_matched {
         default 0;
         "${DESKTOP_BYPASS_TOKEN}"  1;
     }
 
-    # Desktop 初回ロード時に token なしでアクセスされるパス。
-    # いずれも認証不要の読み取り専用エンドポイントで、openchamber 側で
-    # セッションがない場合は 401 を返す。実害なし。
+    # Desktop Origin 判定 (Electron BrowserWindow)
+    map $http_origin $is_desktop_origin {
+        default 0;
+        "openchamber-ui://app"  1;
+    }
+
+    # Desktop 初回ロード時に token なしでアクセスされるパス
     map $uri $is_bootstrap_path {
         default 0;
         "~^/api/path"              1;
@@ -66,17 +70,22 @@ http {
         location / {
             set $backend "${UPSTREAM_OAUTH2_PROXY}";
 
-            # CORS プリフライトは常に openchamber 直
+            # CORS プリフライト (OPTIONS) は常に openchamber 直
             if ($request_method = OPTIONS) {
                 set $backend "${UPSTREAM_OPENCHAMBER}";
             }
 
-            # Desktop 初回ロード用パス → token 不要で openchamber 直
+            # Desktop 初回ロード用パス → openchamber 直
             if ($is_bootstrap_path) {
                 set $backend "${UPSTREAM_OPENCHAMBER}";
             }
 
-            # X-Desktop-Token 一致 → openchamber 直
+            # Desktop Origin → openchamber 直 (Electron BrowserWindow からのリクエスト)
+            if ($is_desktop_origin) {
+                set $backend "${UPSTREAM_OPENCHAMBER}";
+            }
+
+            # X-Desktop-Token 一致 → openchamber 直 (curl/test 用、Desktop メインプロセス用)
             if ($token_matched) {
                 set $backend "${UPSTREAM_OPENCHAMBER}";
             }
