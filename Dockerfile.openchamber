@@ -6,7 +6,6 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /src
-ARG CACHE_BUST
 RUN git clone --depth 1 --branch "$OPENCHAMBER_REF" https://github.com/openchamber/openchamber.git .
 
 FROM oven/bun:1 AS deps
