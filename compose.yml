@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile.openchamber
       args:
         OPENCHAMBER_REF: ${OPENCHAMBER_REF:-main}
+        CACHE_BUST: ${CACHE_BUST:-0}
         UID: ${HOST_UID:-1000}
         GID: ${HOST_GID:-1000}
     container_name: openchamber
