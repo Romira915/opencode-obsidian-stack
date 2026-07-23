@@ -16,7 +16,7 @@ COPY --from=source /src/packages/web/package.json ./packages/web/
 COPY --from=source /src/packages/electron/package.json ./packages/electron/
 COPY --from=source /src/packages/vscode/package.json ./packages/vscode/
 COPY --from=source /src/bun-patches ./bun-patches
-RUN bun install --frozen-lockfile --ignore-scripts
+RUN bun install --ignore-scripts
 
 FROM deps AS builder
 WORKDIR /app
